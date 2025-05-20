@@ -72,7 +72,16 @@ app.get('/api/orders/:username', (req, res) => {
     res.json(rows);
   });
 });
+ 
+// Get user info by username
+app.get('/api/user/:username', (req, res) => {
+  const { username } = req.params;
 
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: "User not found" });
+    res.json(row);
+  });
+});
 
 
 app.listen(PORT, () => {
