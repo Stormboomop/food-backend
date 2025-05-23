@@ -78,6 +78,36 @@ app.post('/api/login', (req, res) => {
     });
 });
 
+// Reset password route with email check
+app.post('/api/reset-password', (req, res) => {
+  const { username, email, newPassword } = req.body;
+
+  if (!username || !email || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Verify the username and email match
+  db.get(`SELECT * FROM users WHERE username = ? AND email = ?`, [username, email], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: "Server error" });
+    }
+
+    if (!row) {
+      return res.status(404).json({ error: "User not found or email incorrect" });
+    }
+
+    // Update the password
+    db.run(`UPDATE users SET password = ? WHERE username = ?`, [newPassword, username], function(err) {
+      if (err) {
+        return res.status(500).json({ error: "Failed to reset password" });
+      }
+
+      res.json({ success: true, message: "Password updated" });
+    });
+  });
+});
+
+
 // Save new order
 app.post('/api/orders', (req, res) => {
   const { username, items, total } = req.body;
@@ -90,6 +120,7 @@ app.post('/api/orders', (req, res) => {
       res.json({ message: "Order saved!", orderId: this.lastID });
     });
 });
+
 
 // Get all food items
 app.get('/api/foods', (req, res) => {
