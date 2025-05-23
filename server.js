@@ -29,6 +29,32 @@ db.run(`CREATE TABLE IF NOT EXISTS orders (
   date TEXT
 )`);
 
+// Create foods table
+db.run(`CREATE TABLE IF NOT EXISTS foods (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  price INTEGER,
+  category TEXT,
+  image TEXT
+)`);
+
+// Insert sample food items (run only ONCE)
+/*db.serialize(() => {
+  db.get("SELECT COUNT(*) as count FROM foods", (err, row) => {
+    if (row.count === 0) {
+      db.run(`INSERT INTO foods (name, price, category, image) VALUES 
+        ('Veg Burger', 80, 'Burger', 'https://cdn-icons-png.flaticon.com/512/1046/1046784.png'),
+        ('Masala Dosa', 60, 'South Indian', 'https://cdn-icons-png.flaticon.com/512/5787/5787031.png'),
+        ('Pizza Slice', 120, 'Pizza', 'https://cdn-icons-png.flaticon.com/512/5787/5787018.png'),
+        ('French Fries', 50, 'Snacks', 'https://cdn-icons-png.flaticon.com/512/1046/1046787.png')
+      `);
+      console.log("🍔 Sample foods inserted!");
+    }
+  });
+});
+
+*/
+
 
 // Signup API
 app.post('/api/signup', (req, res) => {
@@ -63,6 +89,14 @@ app.post('/api/orders', (req, res) => {
       if (err) return res.status(500).json({ error: "Failed to save order." });
       res.json({ message: "Order saved!", orderId: this.lastID });
     });
+});
+
+// Get all food items
+app.get('/api/foods', (req, res) => {
+  db.all(`SELECT * FROM foods`, (err, rows) => {
+    if (err) return res.status(500).json({ error: "Failed to fetch food items" });
+    res.json(rows);
+  });
 });
 
 app.get('/api/orders/:username', (req, res) => {
